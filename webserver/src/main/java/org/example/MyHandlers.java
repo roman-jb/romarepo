@@ -24,7 +24,6 @@ class MyHandlers implements HttpHandler {
 
     public void handleGet(HttpExchange exchange) throws IOException {
         System.out.println("<< Received GET request >>");
-        //String requestedFile = exchange.getRequestURI().getPath().substring("/files".length());
         String requestedFile = exchange.getRequestURI().getPath().replace("/myrepo", "");
         System.out.println("This file was requested: " + requestedFile);
         Path filePath = Path.of(ROOT_FOLDER, requestedFile);
