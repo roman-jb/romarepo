@@ -54,7 +54,6 @@ class MyHandlers implements HttpHandler {
             for (String item : directoryContents) {
                 Path itemPath = filePath.resolve(item);
                 if (Files.isDirectory(itemPath)) {
-//                    response.append("<li><a href=\"/list").append(exchange.getRequestURI().getPath()).append("/").append(item).append("\">[Folder] ").append(item).append("</a></li>");
                     response.append("<li><a href=\"")
                             .append(exchange.getRequestURI()
                             .getPath()).append("/")
@@ -67,7 +66,6 @@ class MyHandlers implements HttpHandler {
             response.append("</ul>");
             response.append("</body></html>");
 
-            //String response = String.join("\n", directoryContents);
             exchange.sendResponseHeaders(200, response.toString().getBytes().length);
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.toString().getBytes());
@@ -92,37 +90,6 @@ class MyHandlers implements HttpHandler {
             exchange.sendResponseHeaders(400, -1); // 400 Bad Request
             return;
         }
-
-//        String[] Folders = fileName.split("/");
-//        StringBuilder currentFolder = new StringBuilder(ROOT_FOLDER);
-//        for (int i = 1; i < Folders.length - 2; i++) {
-//            currentFolder.append("\\").append(Folders[i]);
-//            System.out.println("> Current folder: " + currentFolder);
-//            Path currentFolderPath = Path.of(currentFolder.toString());
-//            if (!Files.exists(currentFolderPath) || !Files.isDirectory(currentFolderPath)) {
-//                File createDirectory = new File(currentFolder.toString());
-//                if (createDirectory.mkdirs()) {
-//                    System.out.println(">>> Current folder DOES NOT exist and was created successfully.");
-//                } else {
-//                    System.err.println("!!! Failed to create directory !!!");
-//                }
-//            }
-//        }
-
-//        int lastSlashIndex = pathAndName.lastIndexOf("/");
-//        String filePath = "placeholder";
-//        if (lastSlashIndex != -1) {
-//            filePath = pathAndName.substring(0, lastSlashIndex);
-//            System.out.println("Resulting string: " + filePath);
-//        } else {
-//            System.out.println("The string does not contain any '/'.");
-//        }
-//        Path filePath = Path.of(ROOT_FOLDER, filePath);
-//        System.out.println("Local path to the file is: " + filePath);
-//        File directory = new File(ROOT_FOLDER + fileName);
-//        if (!directory.exists()) {
-//            directory.mkdirs();
-//        }
 
         Path localFilePath = Path.of(ROOT_FOLDER, filePath);
         Path localFilePathAndName = Path.of(ROOT_FOLDER, pathAndName);

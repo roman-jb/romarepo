@@ -16,11 +16,6 @@ public class SimpleServer {
         InetSocketAddress address = new InetSocketAddress(1234);
         Path path = Path.of("C:\\tmp\\mavenLocal");
         HttpServer server = SimpleFileServer.createFileServer(address, path, SimpleFileServer.OutputLevel.VERBOSE);
-//      HttpHandler fileHandler = SimpleFileServer.createFileHandler(Path.of("C:\\tmp\\mywebserver\\myrepo"));
-//      HttpHandler uploadHandler = HttpHandlers.of(200, Headers.of("PUT"), "");
-//      Predicate<Request> IS_UPLOAD = r -> r.getRequestMethod().equals("PUT");
-//      HttpHandler finalHandler = HttpHandlers.handleOrElse(IS_UPLOAD, uploadHandler, fileHandler);
-//      server.createContext("/myrepo", finalHandler);
         server.start();
     }
 
