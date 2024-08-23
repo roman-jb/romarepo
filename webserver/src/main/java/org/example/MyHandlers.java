@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 class MyHandlers implements HttpHandler {
 
@@ -40,7 +41,39 @@ class MyHandlers implements HttpHandler {
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(fileBytes);
             }
-        } else {
+        } else if (Files.exists(filePath) && Files.isDirectory(filePath)) {
+            List<String> directoryContents = Files.list(filePath)
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .toList();
+
+            // Start constructing the HTML response
+            StringBuilder response = new StringBuilder("<html><body>");
+            response.append("<h2>Directory: ").append(filePath).append("</h2>");
+            response.append("<ul>");
+            for (String item : directoryContents) {
+                Path itemPath = filePath.resolve(item);
+                if (Files.isDirectory(itemPath)) {
+//                    response.append("<li><a href=\"/list").append(exchange.getRequestURI().getPath()).append("/").append(item).append("\">[Folder] ").append(item).append("</a></li>");
+                    response.append("<li><a href=\"")
+                            .append(exchange.getRequestURI()
+                            .getPath()).append("/")
+                            .append(item).append("\">[Folder] ")
+                            .append(item).append("</a></li>");
+                } else {
+                    response.append("<li>").append(item).append("</li>");
+                }
+            }
+            response.append("</ul>");
+            response.append("</body></html>");
+
+            //String response = String.join("\n", directoryContents);
+            exchange.sendResponseHeaders(200, response.toString().getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.toString().getBytes());
+            }
+        }
+        else {
             System.out.println("!!! File not found !!!");
             exchange.sendResponseHeaders(404, -1); // 404 Not Found
         }
@@ -55,7 +88,7 @@ class MyHandlers implements HttpHandler {
         String filePath = pathAndName.substring(0, pathAndName.lastIndexOf("/"));
         System.out.println("The file path is: " + filePath);
 
-        if (pathAndName.isEmpty()) {
+        if (filePath.isEmpty() || fileName.isEmpty()) {
             exchange.sendResponseHeaders(400, -1); // 400 Bad Request
             return;
         }
@@ -97,7 +130,11 @@ class MyHandlers implements HttpHandler {
         System.out.println("Local path and name of the file is: " + localFilePathAndName);
         File directory = new File(String.valueOf(localFilePath));
         if (!directory.exists()) {
-            directory.mkdirs();
+            if (directory.mkdirs()) {
+                System.out.println("Successfully created the directories!");
+            } else {
+                System.out.println("!!! Failed to create directories !!!");
+            }
         }
 
         try (InputStream inputStream = exchange.getRequestBody();
