@@ -49,10 +49,14 @@ class MyHandlers implements HttpHandler {
 
     public void handlePut(HttpExchange exchange) throws IOException {
         System.out.println("<< Received PUT request >>");
-        String fileName = exchange.getRequestURI().getPath().replace("/myrepo", "");
-        System.out.println("Attempting to upload the file: " + fileName);
+        String pathAndName = exchange.getRequestURI().getPath().replace("/myrepo", "");
+        System.out.println("Attempting to upload the file: " + pathAndName);
+        String fileName = pathAndName.substring(pathAndName.lastIndexOf("/") + 1);
+        System.out.println("The file name is: " + fileName);
+        String filePath = pathAndName.substring(0, pathAndName.lastIndexOf("/"));
+        System.out.println("The file path is: " + filePath);
 
-        if (fileName.isEmpty()) {
+        if (pathAndName.isEmpty()) {
             exchange.sendResponseHeaders(400, -1); // 400 Bad Request
             return;
         }
@@ -73,24 +77,32 @@ class MyHandlers implements HttpHandler {
 //            }
 //        }
 
-        int lastSlashIndex = fileName.lastIndexOf("/");
-        String FolderPath = "placeholder";
-        if (lastSlashIndex != -1) {
-            FolderPath = fileName.substring(0, lastSlashIndex);
-            System.out.println("Resulting string: " + FolderPath);
-        } else {
-            System.out.println("The string does not contain any '/'.");
-        }
-        Path filePath = Path.of(ROOT_FOLDER, FolderPath);
-        System.out.println("Local path to the file is: " + filePath);
-        File directory = new File(ROOT_FOLDER + fileName);
+//        int lastSlashIndex = pathAndName.lastIndexOf("/");
+//        String filePath = "placeholder";
+//        if (lastSlashIndex != -1) {
+//            filePath = pathAndName.substring(0, lastSlashIndex);
+//            System.out.println("Resulting string: " + filePath);
+//        } else {
+//            System.out.println("The string does not contain any '/'.");
+//        }
+//        Path filePath = Path.of(ROOT_FOLDER, filePath);
+//        System.out.println("Local path to the file is: " + filePath);
+//        File directory = new File(ROOT_FOLDER + fileName);
+//        if (!directory.exists()) {
+//            directory.mkdirs();
+//        }
+
+        Path localFilePath = Path.of(ROOT_FOLDER, filePath);
+        Path localFilePathAndName = Path.of(ROOT_FOLDER, pathAndName);
+        System.out.println("Local path to the file is: " + localFilePath);
+        System.out.println("Local path and name of the file is: " + localFilePathAndName);
+        File directory = new File(String.valueOf(localFilePath));
         if (!directory.exists()) {
             directory.mkdirs();
         }
 
-        filePath = Path.of(ROOT_FOLDER, fileName);
         try (InputStream inputStream = exchange.getRequestBody();
-             FileOutputStream outputStream = new FileOutputStream(filePath.toFile())) {
+             FileOutputStream outputStream = new FileOutputStream(localFilePathAndName.toFile())) {
             byte[] buffer = new byte[1024];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
@@ -98,6 +110,7 @@ class MyHandlers implements HttpHandler {
             }
         }
         exchange.sendResponseHeaders(201, -1); // 201 Created
+        System.out.println("<< PUT request completed >>");
     }
 
     private void handleError(HttpExchange exchange) throws IOException {
