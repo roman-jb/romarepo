@@ -8,13 +8,29 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 class MyHandlers implements HttpHandler {
 
-    public static final String ROOT_FOLDER = "C:\\tmp\\mavenLocal";
+    protected static final Logger logger = LogManager.getLogger();
+
+    //public static final String ROOT_FOLDER = "C:\\tmp\\mavenLocal";
+
+    private String localRoot;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+
+        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        String appConfigPath = rootPath + "romarepo.properties";
+        Properties appProps = new Properties();
+        appProps.load(new FileInputStream(appConfigPath));
+        localRoot = appProps.getProperty("localRoot","C:\\romarepo");
+        logger.debug("Local root: {}", localRoot);
+
         String requestMethod = exchange.getRequestMethod();
         switch (requestMethod) {
             case "GET" -> handleGet(exchange);
@@ -24,14 +40,14 @@ class MyHandlers implements HttpHandler {
     }
 
     public void handleGet(HttpExchange exchange) throws IOException {
-        System.out.println("<< Received GET request >>");
+        logger.debug("<< Received GET request >>");
         String requestedFile = exchange.getRequestURI().getPath().replace("/myrepo", "");
-        System.out.println("This file was requested: " + requestedFile);
-        Path filePath = Path.of(ROOT_FOLDER, requestedFile);
-        System.out.println("Local path to the file is: " + filePath);
+        logger.debug("The following resource was requested: {}", requestedFile);
+        Path filePath = Path.of(localRoot, requestedFile);
+        logger.debug("Local path to the file is: {}", filePath);
 
         if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
-            System.out.println("> The file exists!");
+            logger.debug("> The file exists!");
             byte[] fileBytes = Files.readAllBytes(filePath);
             String contentType = Files.probeContentType(filePath);
 
@@ -49,7 +65,7 @@ class MyHandlers implements HttpHandler {
 
             // Start constructing the HTML response
             StringBuilder response = new StringBuilder("<html><body>");
-            response.append("<h2>Directory: ").append(filePath).append("</h2>");
+            response.append("<h2>Directory: ").append(requestedFile).append("</h2>");
             response.append("<ul>");
             for (String item : directoryContents) {
                 Path itemPath = filePath.resolve(item);
@@ -60,7 +76,12 @@ class MyHandlers implements HttpHandler {
                             .append(item).append("\">[Folder] ")
                             .append(item).append("</a></li>");
                 } else {
-                    response.append("<li>").append(item).append("</li>");
+                    response.append("<li><a href=\"")
+                            .append(exchange.getRequestURI()
+                            .getPath()).append("/")
+                            .append(item).append("\">")
+                            .append(item).append("</a></li>");
+                    //response.append("<li>").append(item).append("</li>");
                 }
             }
             response.append("</ul>");
@@ -72,35 +93,36 @@ class MyHandlers implements HttpHandler {
             }
         }
         else {
-            System.out.println("!!! File not found !!!");
+            logger.info("!!! File not found !!!");
             exchange.sendResponseHeaders(404, -1); // 404 Not Found
         }
     }
 
     public void handlePut(HttpExchange exchange) throws IOException {
-        System.out.println("<< Received PUT request >>");
+        logger.debug("<< Received PUT request >>");
         String pathAndName = exchange.getRequestURI().getPath().replace("/myrepo", "");
-        System.out.println("Attempting to upload the file: " + pathAndName);
+        logger.debug("Attempting to upload the file: {}", pathAndName);
         String fileName = pathAndName.substring(pathAndName.lastIndexOf("/") + 1);
-        System.out.println("The file name is: " + fileName);
+        logger.debug("The file name is: {}", fileName);
         String filePath = pathAndName.substring(0, pathAndName.lastIndexOf("/"));
-        System.out.println("The file path is: " + filePath);
+        logger.debug("The file path is: {}", filePath);
 
         if (filePath.isEmpty() || fileName.isEmpty()) {
             exchange.sendResponseHeaders(400, -1); // 400 Bad Request
             return;
         }
 
-        Path localFilePath = Path.of(ROOT_FOLDER, filePath);
-        Path localFilePathAndName = Path.of(ROOT_FOLDER, pathAndName);
-        System.out.println("Local path to the file is: " + localFilePath);
-        System.out.println("Local path and name of the file is: " + localFilePathAndName);
+        Path localFilePath = Path.of(localRoot, filePath);
+        Path localFilePathAndName = Path.of(localRoot, pathAndName);
+        logger.debug("Local path to the file is: " + localFilePath);
+        logger.debug("Local path and name of the file is: " + localFilePathAndName);
         File directory = new File(String.valueOf(localFilePath));
         if (!directory.exists()) {
             if (directory.mkdirs()) {
-                System.out.println("Successfully created the directories!");
+                logger.debug("Successfully created the directories!");
             } else {
-                System.out.println("!!! Failed to create directories !!!");
+                logger.info("!!! Failed to create directories !!!");
+                logger.info(directory);
             }
         }
 
@@ -113,7 +135,7 @@ class MyHandlers implements HttpHandler {
             }
         }
         exchange.sendResponseHeaders(201, -1); // 201 Created
-        System.out.println("<< PUT request completed >>");
+        logger.debug("<< PUT request completed >>");
     }
 
     private void handleError(HttpExchange exchange) throws IOException {
