@@ -29,7 +29,7 @@ class MyHandlers implements HttpHandler {
         Properties appProps = new Properties();
         appProps.load(new FileInputStream(appConfigPath));
         localRoot = appProps.getProperty("localRoot","C:\\romarepo");
-        logger.debug("Local root: {}", localRoot);
+        //logger.debug("Local root: {}", localRoot); //Too spammy!
 
         String requestMethod = exchange.getRequestMethod();
         switch (requestMethod) {
@@ -47,16 +47,34 @@ class MyHandlers implements HttpHandler {
         logger.debug("Local path to the file is: {}", filePath);
 
         if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
-            logger.debug("> The file exists!");
-            byte[] fileBytes = Files.readAllBytes(filePath);
-            String contentType = Files.probeContentType(filePath);
-
-            exchange.getResponseHeaders().set("Content-Type", contentType != null ? contentType : "application/octet-stream");
-            exchange.sendResponseHeaders(200, fileBytes.length);
-
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(fileBytes);
+            long fileSize = Files.size(filePath);  // Get the size of the file
+            // Set the response headers
+            exchange.getResponseHeaders().add("Content-Type", "application/octet-stream");
+            exchange.getResponseHeaders().add("Content-Length", Long.toString(fileSize));
+            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=\"" + filePath.getFileName() + "\"");
+            exchange.sendResponseHeaders(200, fileSize);
+            try (exchange; OutputStream os = exchange.getResponseBody();
+                 FileInputStream fis = new FileInputStream(filePath.toFile())) {
+                //String contentType = Files.probeContentType(filePath);
+                //exchange.getResponseHeaders().set("Content-Type", contentType != null ? contentType : "application/octet-stream");
+                //exchange.sendResponseHeaders(200, 0);
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = fis.read(buffer)) != -1) {
+                    os.write(buffer, 0, bytesRead);
+                }
+                logger.debug("<< GET request completed >>");
             }
+//            logger.debug("> The file exists!");
+//            byte[] fileBytes = Files.readAllBytes(filePath); //May eat too much RAM - FIX!
+//            String contentType = Files.probeContentType(filePath);
+//
+//            exchange.getResponseHeaders().set("Content-Type", contentType != null ? contentType : "application/octet-stream");
+//            exchange.sendResponseHeaders(200, fileBytes.length);
+//
+//            try (OutputStream os = exchange.getResponseBody()) {
+//                os.write(fileBytes);
+//            }
         } else if (Files.exists(filePath) && Files.isDirectory(filePath)) {
             List<String> directoryContents = Files.list(filePath)
                     .map(Path::getFileName)
@@ -67,6 +85,9 @@ class MyHandlers implements HttpHandler {
             StringBuilder response = new StringBuilder("<html><body>");
             response.append("<h2>Directory: ").append(requestedFile).append("</h2>");
             response.append("<ul>");
+            if (!requestedFile.equals("/")) {
+                response.append("<li><a href=\"../\">[..]</a></li>");
+            }
             for (String item : directoryContents) {
                 Path itemPath = filePath.resolve(item);
                 if (Files.isDirectory(itemPath)) {
@@ -114,8 +135,8 @@ class MyHandlers implements HttpHandler {
 
         Path localFilePath = Path.of(localRoot, filePath);
         Path localFilePathAndName = Path.of(localRoot, pathAndName);
-        logger.debug("Local path to the file is: " + localFilePath);
-        logger.debug("Local path and name of the file is: " + localFilePathAndName);
+        logger.debug("Local path to the file is: {}", localFilePath);
+        logger.debug("Local path and name of the file is: {}", localFilePathAndName);
         File directory = new File(String.valueOf(localFilePath));
         if (!directory.exists()) {
             if (directory.mkdirs()) {
@@ -128,7 +149,7 @@ class MyHandlers implements HttpHandler {
 
         try (InputStream inputStream = exchange.getRequestBody();
              FileOutputStream outputStream = new FileOutputStream(localFilePathAndName.toFile())) {
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);

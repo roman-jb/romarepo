@@ -6,18 +6,20 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class RunServer {
-    protected static final Logger logger = LogManager.getLogger();
+//    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] args) throws IOException {
-        System.setProperty("log4j.configurationFile", "log4j2-dev.xml");
+        System.setProperty("log4j.configurationFile", "log4j2-dev.xml"); //Doesn't work - needs fixing
+        Logger logger = LogManager.getLogger();
 
-        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        String rootPath = Objects.requireNonNull(Thread.currentThread().getContextClassLoader().getResource("")).getPath();
         String appConfigPath = rootPath + "romarepo.properties";
         Properties appProps = new Properties();
         appProps.load(new FileInputStream(appConfigPath));
@@ -41,7 +43,8 @@ public class RunServer {
     }
 
     private static void StartServerWithCustomHandlers(int port, int backlog, String path) throws IOException {
-        final Logger logger = LogManager.getLogger();
+        System.setProperty("log4j.configurationFile", "log4j2-dev.xml"); //Doesn't work - needs fixing
+        Logger logger = LogManager.getLogger();
         HttpServer myServer = HttpServer.create(new InetSocketAddress(port), backlog, path, new MyHandlers());
         myServer.start();
         logger.info("============= SERVER STARTED ===========");
