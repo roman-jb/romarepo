@@ -94,8 +94,8 @@ class MyHandlers implements HttpHandler {
                     response.append("<li><a href=\"")
                             .append(exchange.getRequestURI()
                             .getPath()).append("/")
-                            .append(item).append("\">[Folder] ")
-                            .append(item).append("</a></li>");
+                            .append(item).append("\">[")
+                            .append(item).append("]").append("</a></li>");
                 } else {
                     response.append("<li><a href=\"")
                             .append(exchange.getRequestURI()

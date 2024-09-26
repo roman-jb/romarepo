@@ -45,7 +45,11 @@ public class RunServer {
     private static void StartServerWithCustomHandlers(int port, int backlog, String path) throws IOException {
         System.setProperty("log4j.configurationFile", "log4j2-dev.xml"); //Doesn't work - needs fixing
         Logger logger = LogManager.getLogger();
-        HttpServer myServer = HttpServer.create(new InetSocketAddress(port), backlog, path, new MyHandlers());
+        //HttpServer myServer = HttpServer.create(new InetSocketAddress(port), backlog, path, new MyHandlers());
+        HttpServer myServer = HttpServer.create(new InetSocketAddress(port), backlog);
+        myServer.createContext(path, new MyHandlers());
+        myServer.createContext("/api", new ApiHandlers());
+        myServer.setExecutor(null);
         myServer.start();
         logger.info("============= SERVER STARTED ===========");
     }
