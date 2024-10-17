@@ -6,16 +6,16 @@
 <body>
 <h1>JSON Data</h1>
 <ul>
-    <li><strong>Type:</strong> <span th:text="${jsonData.Type}">Name</span></li>
-    <li><strong>Name:</strong> <span th:text="${jsonData.Name}">Age</span></li>
+    <li><strong>Type:</strong> <span th:text="${jsonData.name}">Name</span></li>
+    <li><strong>Name:</strong> <span th:text="${jsonData.type}">Type</span></li>
 </ul>
 
 <!-- Example for iterating over a JSON array -->
-<h2>JSON Array</h2>
-<ul>
-    <li th:each="item : ${jsonData.someArray}">
-        <span th:text="${item}">Item</span>
-    </li>
-</ul>
+<!--<h2>JSON Array</h2>-->
+<!--<ul>-->
+<!--    <li th:each="item : ${jsonData.someArray}">-->
+<!--        <span th:text="${item}">Item</span>-->
+<!--    </li>-->
+<!--</ul>-->
 </body>
 </html>

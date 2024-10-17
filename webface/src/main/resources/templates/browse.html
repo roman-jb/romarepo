@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Directories</title>
+</head>
+<body>
+<h1>Directories</h1>
+<ul>
+    <li th:each="fso : ${fileSystemObjects}">
+        <a th:href="@{/{directoryName}(directoryName=${fso.name})}" th:text="${fso.name}"></a>
+    </li>
+</ul>
+</body>
+</html>

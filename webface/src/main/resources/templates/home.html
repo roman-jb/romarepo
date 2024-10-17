@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>-= RomaRepo Home =-</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+    <style>
+        /*body {*/
+        /*    background-color: darkgreen;*/
+        /*}*/
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .center-content img {
+            display: block;
+            margin: 10px 0;
+        }
+
+        .center-content button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="center-content">
+    <div>
+        <h1>Welcome to RomaRepo</h1>
+    </div>
+    <div>
+        <img th:src="@{/images/welcome.jpg}" alt="Welcome!" style="width: 300px; height: auto; margin-bottom: 20px;"/>
+    </div>
+    <div>
+        <a th:href="@{/browse}" style="text-decoration: none;">
+            <button type="button">Browse the Repo</button>
+        </a>
+        <button type="button">Search the Repo</button>
+        <button type="button">[Work in Progress]</button>
+    </div>
+</div>
+</body>
+</html>

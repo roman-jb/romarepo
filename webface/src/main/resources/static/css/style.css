@@ -1,0 +1,16 @@
+.center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.center-content img {
+    display: block;
+    margin: 10px 0;
+}
+
+.center-content button {
+    margin: 5px;
+}

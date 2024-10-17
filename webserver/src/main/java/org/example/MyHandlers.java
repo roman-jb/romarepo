@@ -47,71 +47,10 @@ class MyHandlers implements HttpHandler {
         logger.debug("Local path to the file is: {}", filePath);
 
         if (Files.exists(filePath) && !Files.isDirectory(filePath)) {
-            long fileSize = Files.size(filePath);  // Get the size of the file
-            // Set the response headers
-            exchange.getResponseHeaders().add("Content-Type", "application/octet-stream");
-            exchange.getResponseHeaders().add("Content-Length", Long.toString(fileSize));
-            exchange.getResponseHeaders().add("Content-Disposition", "attachment; filename=\"" + filePath.getFileName() + "\"");
-            exchange.sendResponseHeaders(200, fileSize);
-            try (exchange; OutputStream os = exchange.getResponseBody();
-                 FileInputStream fis = new FileInputStream(filePath.toFile())) {
-                //String contentType = Files.probeContentType(filePath);
-                //exchange.getResponseHeaders().set("Content-Type", contentType != null ? contentType : "application/octet-stream");
-                //exchange.sendResponseHeaders(200, 0);
-                byte[] buffer = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = fis.read(buffer)) != -1) {
-                    os.write(buffer, 0, bytesRead);
-                }
-                logger.debug("<< GET request completed >>");
-            }
-//            logger.debug("> The file exists!");
-//            byte[] fileBytes = Files.readAllBytes(filePath); //May eat too much RAM - FIX!
-//            String contentType = Files.probeContentType(filePath);
-//
-//            exchange.getResponseHeaders().set("Content-Type", contentType != null ? contentType : "application/octet-stream");
-//            exchange.sendResponseHeaders(200, fileBytes.length);
-//
-//            try (OutputStream os = exchange.getResponseBody()) {
-//                os.write(fileBytes);
-//            }
+            MyUtils.sendFile(filePath, exchange);
+            logger.debug("<< GET request completed >>");
         } else if (Files.exists(filePath) && Files.isDirectory(filePath)) {
-            List<String> directoryContents = Files.list(filePath)
-                    .map(Path::getFileName)
-                    .map(Path::toString)
-                    .toList();
-
-            // Start constructing the HTML response
-            StringBuilder response = new StringBuilder("<html><body>");
-            response.append("<h2>Directory: ").append(requestedFile).append("</h2>");
-            response.append("<ul>");
-            if (!requestedFile.equals("/")) {
-                response.append("<li><a href=\"../\">[..]</a></li>");
-            }
-            for (String item : directoryContents) {
-                Path itemPath = filePath.resolve(item);
-                if (Files.isDirectory(itemPath)) {
-                    response.append("<li><a href=\"")
-                            .append(exchange.getRequestURI()
-                            .getPath()).append("/")
-                            .append(item).append("\">[")
-                            .append(item).append("]").append("</a></li>");
-                } else {
-                    response.append("<li><a href=\"")
-                            .append(exchange.getRequestURI()
-                            .getPath()).append("/")
-                            .append(item).append("\">")
-                            .append(item).append("</a></li>");
-                    //response.append("<li>").append(item).append("</li>");
-                }
-            }
-            response.append("</ul>");
-            response.append("</body></html>");
-
-            exchange.sendResponseHeaders(200, response.toString().getBytes().length);
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(response.toString().getBytes());
-            }
+            MyUtils.getDirectoryContentsHTML(filePath, exchange, requestedFile);
         }
         else {
             logger.info("!!! File not found !!!");
