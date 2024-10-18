@@ -4,14 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.webface.FileSystemObject;
+import org.example.webface.SearchQuery;
 import org.example.webface.service.BackendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -25,7 +23,14 @@ public class WebfaceController {
 
     @GetMapping
     public String home(Model model) {
+        model.addAttribute("query", new SearchQuery());
         return "home";
+    }
+
+    @PostMapping("/search")
+    public String search(@ModelAttribute SearchQuery query, Model model) {
+        model.addAttribute("query", query);
+        return "search";
     }
 
     @Autowired

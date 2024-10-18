@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>-= RomaRepo Home =-</title>
+    <title><< RomaRepo Search >></title>
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
     <style>
         body {
@@ -28,27 +28,14 @@
 <body>
 <div class="center-content">
     <div>
-        <h1>Welcome to RomaRepo!</h1>
-    </div>
-    <div>
-        <h3>Look, it works!</h3>
-    </div>
-    <div>
-        <img th:src="@{/images/welcome.jpg}" alt="Welcome!" style="width: 300px; height: auto; margin-bottom: 20px;"/>
-    </div>
-    <div>
-<!--        <button type="button">Search the Repo</button>-->
-    </div>
-    <div>
-        <form th:action="@{/search}" th:object="${query}" method="post">
-            <label for="query"></label><input id="query" type="text" th:field="*{query}" />
+        <form th:action="@{/home}" th:object="${query}" method="post">
+            <!--            <label for="name">Name:</label>-->
+            <input id="query" type="text" th:field="*{query}" />
             <button type="submit">Search</button>
         </form>
     </div>
     <div>
-        <a th:href="@{/browse}" style="text-decoration: none;">
-            <button type="button">Browse the Repo</button>
-        </a>
+        <h3>Search results for [search query goes here]</h3>
     </div>
 </div>
 </body>
