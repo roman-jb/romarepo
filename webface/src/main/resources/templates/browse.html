@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="">
 <head>
     <title>Directories</title>
 </head>
 <body>
 <h1>Directories</h1>
 <ul>
+<!--    <li>-->
+<!--    <a th:href="@{/browse(directoryName='UP')}">[..]</a>-->
+<!--    </li>-->
     <li th:each="fso : ${fileSystemObjects}">
-        <a th:href="@{/{directoryName}(directoryName=${fso.name})}" th:text="${fso.name}"></a>
+        <a th:href="@{/browse(directoryName=${fso.name})}" th:onclick="getContent(fso.name)" th:text="${fso.name}"></a>
     </li>
 </ul>
 </body>
