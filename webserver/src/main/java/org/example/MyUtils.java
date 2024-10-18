@@ -1,15 +1,29 @@
 package org.example;
 
 import com.sun.net.httpserver.HttpExchange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.*;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
+import java.util.stream.Stream;
+
 
 public class MyUtils {
+    private static final Logger log = LogManager.getLogger(MyUtils.class);
+
     static void sendFile(Path filePath, HttpExchange exchange) throws IOException {
         long fileSize = Files.size(filePath);  // Get the size of the file
         exchange.getResponseHeaders().add("Content-Type", "application/octet-stream");
@@ -62,6 +76,56 @@ public class MyUtils {
         exchange.sendResponseHeaders(200, response.toString().getBytes().length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.toString().getBytes());
+        }
+    }
+
+    // !!! Does not account for cases, where <version> is not explicitly specified
+    static MavenArtifact indexArtifact(String pathToPomXml) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document document = builder.parse(new File(pathToPomXml));
+        document.getDocumentElement().normalize();
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xPath = xPathfactory.newXPath();
+
+        // vvv optimize? vvv
+        XPathExpression groupId = xPath.compile("//project/groupId");
+        XPathExpression artifactId = xPath.compile("//project/artifactId");
+        XPathExpression version = xPath.compile("//project/version");
+
+        NodeList groupIdList = (NodeList) groupId.evaluate(document, XPathConstants.NODESET);
+        NodeList artifactIdList = (NodeList) artifactId.evaluate(document, XPathConstants.NODESET);
+        NodeList versionList = (NodeList) version.evaluate(document, XPathConstants.NODESET);
+
+        return new MavenArtifact(
+                groupIdList.item(0).getTextContent(),
+                artifactIdList.item(0).getTextContent(),
+                versionList.item(0).getTextContent());
+    }
+
+    static void indexRepo() {
+        String startDir = "C:\\tmp\\mavenLocal";
+        String fileToFind = "pom.xml";
+
+        try {
+            Files.walkFileTree(Paths.get(startDir), new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    if (file.getFileName().toString().equals(fileToFind)) {
+                        System.out.println("Found file: " + file);
+                        return FileVisitResult.TERMINATE;
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    log.error("e: ", exc);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

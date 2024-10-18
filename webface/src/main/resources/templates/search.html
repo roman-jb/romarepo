@@ -29,8 +29,7 @@
 <div class="center-content">
     <div>
         <form th:action="@{/home}" th:object="${query}" method="post">
-            <!--            <label for="name">Name:</label>-->
-            <input id="query" type="text" th:field="*{query}" />
+            <label for="query"></label><input id="query" type="text" th:field="*{query}" />
             <button type="submit">Search</button>
         </form>
     </div>
