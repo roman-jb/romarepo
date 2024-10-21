@@ -5,7 +5,10 @@ import com.sun.net.httpserver.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -15,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 public class RunServer {
 //    private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException {
         System.setProperty("log4j.configurationFile", "log4j2-dev.xml"); //Doesn't work - needs fixing
         Logger logger = LogManager.getLogger();
 
@@ -27,19 +30,15 @@ public class RunServer {
         int port = Integer.parseInt(appProps.getProperty("port","1234"));
         String localRoot = appProps.getProperty("localRoot","C:\\romarepo");
         String bindTo = appProps.getProperty("bindTo","/");
+        String databaseLocation = appProps.getProperty("databaseLocation", "C:\\Users\\Roman.Vatagin\\AppData\\Local\\romarepo");
         logger.debug("Server port: {}", port);
         logger.debug("Local root: {}", localRoot);
         logger.debug("Bind to: {}", bindTo);
 
         //StartSimpleServer();
+        logger.info("Checking the database...");
+        checkDatabaseStatus(databaseLocation);
         StartServerWithCustomHandlers(port, 10, bindTo);
-    }
-
-    private static void StartSimpleServer() {
-        InetSocketAddress address = new InetSocketAddress(1234);
-        Path path = Path.of("C:\\tmp\\mavenLocal");
-        HttpServer server = SimpleFileServer.createFileServer(address, path, SimpleFileServer.OutputLevel.VERBOSE);
-        server.start();
     }
 
     private static void StartServerWithCustomHandlers(int port, int backlog, String path) throws IOException {
@@ -52,5 +51,22 @@ public class RunServer {
         myServer.setExecutor(null);
         myServer.start();
         logger.info("============= SERVER STARTED ===========");
+    }
+
+    private static void checkDatabaseStatus(String databaseLocation) throws SQLException {
+        String databasePathString = databaseLocation + "/romarepo.db";
+        Path databasePath = Path.of(databasePathString);
+        if(!Files.exists(databasePath)) {
+            SQLiteUtils sqlLiteInit = new SQLiteUtils();
+            sqlLiteInit.initDatabase(sqlLiteInit.connect(databasePathString));
+        };
+    }
+
+    //Deprecated - to be removed
+    private static void StartSimpleServer() {
+        InetSocketAddress address = new InetSocketAddress(1234);
+        Path path = Path.of("C:\\tmp\\mavenLocal");
+        HttpServer server = SimpleFileServer.createFileServer(address, path, SimpleFileServer.OutputLevel.VERBOSE);
+        server.start();
     }
 }

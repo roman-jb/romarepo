@@ -1,6 +1,5 @@
 package org.example;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +41,7 @@ class ApiHandlers implements HttpHandler {
         Path LocalPath = Path.of(localRoot, localResource);
         logger.debug("Local resource is: {}", LocalPath);
         if (Files.exists(LocalPath) && !Files.isDirectory(LocalPath)) {
-            MyUtils.sendFile(LocalPath, exchange); //TODO: Test if it actually works lol
+            MyUtils.sendFile(LocalPath, exchange); //TODO: Doesn't work!
         } else if (Files.exists(LocalPath) && Files.isDirectory(LocalPath)) {
             String jsonResponse = ApiUtils.getDirectoryContentsJSON(LocalPath);
             exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
