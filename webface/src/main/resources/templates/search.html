@@ -23,18 +23,33 @@
         .center-content button {
             margin: 5px;
         }
+        .top-right {
+            position: absolute;
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            z-index: 1000; /* Ensure it stays on top */
+            text-decoration: none; /* Optional: Remove underline */
+        }
     </style>
 </head>
 <body>
-<div class="center-content">
+    <a th:href="@{/}" class="top-right">[Home]</a>
+    <div class="center-content">
+        <!--    <div>-->
+        <!--        <form th:action="@{/home}" th:object="${query}" method="post">-->
+        <!--            <label for="searchQuery"></label><input id="searchQuery" type="text" th:field="*{searchQuery}" />-->
+        <!--            <button type="submit">Search</button>-->
+        <!--        </form>-->
+        <!--    </div>-->
     <div>
-        <form th:action="@{/home}" th:object="${query}" method="post">
-            <label for="query"></label><input id="query" type="text" th:field="*{query}" />
+        <form th:action="@{/search}" method="post" style="margin-bottom: 20px;">
+            <label for="searchQuery"></label>
+            <input id="searchQuery" type="text" name="searchQuery" placeholder="Search for a package..." />
             <button type="submit">Search</button>
         </form>
     </div>
     <div>
-        <h3>Search results for [search query goes here]</h3>
+        <h3 style="display: inline">Search results for </h3> <p style="display: inline" th:text="${searchQuery}"></p>
     </div>
 </div>
 </body>

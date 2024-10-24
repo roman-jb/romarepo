@@ -11,6 +11,10 @@ import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 
 class MyHandlers implements HttpHandler {
 
@@ -23,22 +27,29 @@ class MyHandlers implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-        String appConfigPath = rootPath + "romarepo.properties";
-        Properties appProps = new Properties();
-        appProps.load(new FileInputStream(appConfigPath));
-        localRoot = appProps.getProperty("localRoot","C:\\romarepo");
-        //logger.debug("Local root: {}", localRoot); //Too spammy!
-
         String requestMethod = exchange.getRequestMethod();
         switch (requestMethod) {
             case "GET" -> handleGet(exchange);
-            case "PUT" -> handlePut(exchange);
+            case "PUT" -> {
+                try {
+                    handlePut(exchange);
+                } catch (XPathExpressionException | ParserConfigurationException | SAXException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             default -> handleError(exchange);
         }
     }
 
     public void handleGet(HttpExchange exchange) throws IOException {
+
+        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        String appConfigPath = rootPath + "romarepo.properties";
+        Properties appProps = new Properties();
+        appProps.load(new FileInputStream(appConfigPath));
+        localRoot = appProps.getProperty("localRoot","C:\\romarepo");
+        String databaseLocation = appProps.getProperty("databaseLocation", "C:\\Users\\Roman.Vatagin\\AppData\\Local\\romarepo");
+
         logger.debug("<< Received GET request >>");
         String requestedFile = exchange.getRequestURI().getPath().replace("/myrepo", "");
         logger.debug("The following resource was requested: {}", requestedFile);
@@ -57,7 +68,14 @@ class MyHandlers implements HttpHandler {
         }
     }
 
-    public void handlePut(HttpExchange exchange) throws IOException {
+    public void handlePut(HttpExchange exchange) throws IOException, XPathExpressionException, ParserConfigurationException, SAXException {
+        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        String appConfigPath = rootPath + "romarepo.properties";
+        Properties appProps = new Properties();
+        appProps.load(new FileInputStream(appConfigPath));
+        localRoot = appProps.getProperty("localRoot","C:\\romarepo");
+        String databaseLocation = appProps.getProperty("databaseLocation", "C:\\Users\\Roman.Vatagin\\AppData\\Local\\romarepo");
+        
         logger.debug("<< Received PUT request >>");
         String pathAndName = exchange.getRequestURI().getPath().replace("/myrepo", "");
         logger.debug("Attempting to upload the file: {}", pathAndName);
@@ -95,6 +113,12 @@ class MyHandlers implements HttpHandler {
         }
         exchange.sendResponseHeaders(201, -1); // 201 Created
         logger.debug("<< PUT request completed >>");
+
+        if (fileName.equals("pom.xml")) {
+            MavenArtifact artifact = MyUtils.indexArtifact(pathAndName);
+            SQLiteUtils sql = new SQLiteUtils();
+            sql.insert(artifact, sql.connect(databaseLocation));
+        }
     }
 
     private void handleError(HttpExchange exchange) throws IOException {

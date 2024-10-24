@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -102,29 +103,53 @@ public class MyUtils {
                 versionList.item(0).getTextContent());
     }
 
-    static void indexRepo() {
-        String startDir = "C:\\tmp\\mavenLocal";
-        String fileToFind = "pom.xml";
+    static void indexRepo() throws IOException {
 
-        try {
-            Files.walkFileTree(Paths.get(startDir), new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    if (file.getFileName().toString().equals(fileToFind)) {
-                        System.out.println("Found file: " + file);
-                        return FileVisitResult.TERMINATE;
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
+        Path rootPath = Paths.get("C:\\tmp\\mavenLocal");
 
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException exc) {
-                    log.error("e: ", exc);
-                    return FileVisitResult.CONTINUE;
+        List<Path> allFiles = new ArrayList<>();
+        findAllPoms(rootPath, allFiles);
+
+        System.out.println("Found files:");
+        allFiles.forEach(System.out::println);
+
+//        String startDir = "C:\\tmp\\mavenLocal";
+//        String fileToFind = "pom.xml";
+//
+//        try {
+//            Files.walkFileTree(Paths.get(startDir), new SimpleFileVisitor<>() {
+//                @Override
+//                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+//                    if (file.getFileName().toString().equals(fileToFind)) {
+//                        System.out.println("Found file: " + file);
+//                        return FileVisitResult.TERMINATE;
+//                    }
+//                    return FileVisitResult.CONTINUE;
+//                }
+//
+//                @Override
+//                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+//                    log.error("e: ", exc);
+//                    return FileVisitResult.CONTINUE;
+//                }
+//            });
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+    private static void findAllPoms(Path currentPath, List<Path> allFiles)
+            throws IOException
+    {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentPath))
+        {
+            for (Path entry : stream) {
+                if (Files.isDirectory(entry)) {
+                    findAllPoms(entry, allFiles);
+                } else if (entry.toString().endsWith(".pom")) {
+                    allFiles.add(entry);
                 }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+            }
         }
     }
 }

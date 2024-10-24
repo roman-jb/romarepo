@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <title>RomaRepo Settings</title>
+    <style>
+        body {
+            background-color: darkseagreen;
+        }
+        .center-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .top-right {
+            position: absolute;
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            z-index: 1000; /* Ensure it stays on top */
+            text-decoration: none; /* Optional: Remove underline */
+        }
+    </style>
+</head>
+<body>
+<a th:href="@{/}" class="top-right">[Home]</a>
+<div class="center-content">
+    <h1>RomaRepo Settings</h1>
+    <p>
+        <a th:href="@{/settings}">Re-index the Repo</a>
+    </p>
+    <p>
+        <a th:href="@{/settings}">Verify and generate checksums</a>
+    </p>
+</div>
+</body>
+</html>

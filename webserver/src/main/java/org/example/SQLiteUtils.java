@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLiteUtils {
 
@@ -27,12 +29,12 @@ public class SQLiteUtils {
 
     void initDatabase(Connection conn) {
         // SQL statement for creating a new table
-        String sql = "CREATE TABLE IF NOT EXISTS artifacts (\n"
-                + " id integer PRIMARY KEY,\n"
-                + " groupid text NOT NULL,\n"
-                + " artifactid text NOT NULL \n"
-                + " version text NOT NULL \n"
-                + ");";
+        String sql = "CREATE TABLE IF NOT EXISTS artifacts ("
+                + " id integer PRIMARY KEY,"
+                + " groupid text NOT NULL,"
+                + " artifactid text NOT NULL,"
+                + " version text NOT NULL"
+                + ")";
 
         try (conn;
              Statement stmt = conn.createStatement()) {
@@ -42,14 +44,17 @@ public class SQLiteUtils {
         }
     }
 
-    void insert(String groupId, String artifactId, String version, Connection conn) {
-        String sql = "INSERT INTO users(name, email) VALUES(?,?)";
+    void insert(MavenArtifact artifact, Connection conn) {
+        String sql = "INSERT INTO artifacts(groupid, artifactid, version) VALUES('"
+                + artifact.getGroupId() + "', '"
+                + artifact.getArtifactId() + "', '"
+                + artifact.getVersion() + "')";
 
         try (conn;
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, groupId);
-            pstmt.setString(2, artifactId);
-            pstmt.setString(2, version);
+         PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//            pstmt.setString(1, groupId);
+//            pstmt.setString(2, artifactId);
+//            pstmt.setString(2, version);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -73,4 +78,62 @@ public class SQLiteUtils {
             System.out.println(e.getMessage());
         }
     }
+
+    List<MavenArtifact> findArtifacts(String searchString, Connection conn) {
+        List<MavenArtifact> searchResults = new ArrayList<>();
+        String sqliteQuery = "SELECT * FROM artifacts WHERE " +
+                "groupId LIKE '%"+ searchString + "%'" +
+                " OR artifactId LIKE '%"+ searchString + "%'";
+        try (conn;
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sqliteQuery)) {
+            while (rs.next()) {
+                MavenArtifact artifact = new MavenArtifact(rs.getString("groupId"),
+                        rs.getString("artifactId"),
+                        rs.getString("version"));
+                searchResults.add(artifact);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return searchResults;
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

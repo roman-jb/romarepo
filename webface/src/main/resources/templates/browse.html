@@ -1,17 +1,30 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="">
 <head>
-    <title>Directories</title>
+    <title>Browse RomaRepo</title>
+    <style>
+        .top-right {
+            position: absolute;
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            z-index: 1000; /* Ensure it stays on top */
+            text-decoration: none; /* Optional: Remove underline */
+        }
+    </style>
 </head>
 <body>
-<h1>Directories</h1>
-<ul>
-<!--    <li>-->
-<!--    <a th:href="@{/browse(directoryName='UP')}">[..]</a>-->
-<!--    </li>-->
-    <li th:each="fso : ${fileSystemObjects}">
-        <a th:href="@{/browse(directoryName=${fso.name})}" th:onclick="getContent(fso.name)" th:text="${fso.name}"></a>
-    </li>
-</ul>
+    <h1>Repo Contents</h1>
+    <a th:href="@{/}" class="top-right">[Home]</a>
+    <ul>
+<!--        <li th:each="fso : ${fileSystemObjects}">-->
+<!--            <a th:href="@{/browse(directoryName=${fso.name})}" th:onclick="getContent(fso.name)" th:text="${fso.name}"></a>-->
+<!--        </li>-->
+        <li th:each="directory : ${directories}">
+            <a th:href="@{/browse(directoryName=${directory})}" th:onclick="getContent(directory)" th:text="${directory}"></a>
+        </li>
+    </ul>
+    <div th:each="file : ${filesMap}">
+        <a th:href="${file.getValue()}" th:text="${file.getKey()}"></a>
+    </div>
 </body>
 </html>

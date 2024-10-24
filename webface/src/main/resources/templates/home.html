@@ -23,9 +23,23 @@
         .center-content button {
             margin: 5px;
         }
+
+        .top-right {
+            position: absolute;
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            z-index: 1000; /* Ensure it stays on top */
+            text-decoration: none; /* Optional: Remove underline */
+            width: 50px;
+            height: auto;
+        }
     </style>
 </head>
 <body>
+<!--<img th:src="@{/images/cogwheels.jpg}" th:href="@{/settings}" alt="Settings" class="top-right"/>-->
+<a th:href="@{/settings}">
+    <img th:src="@{/images/cogwheels.jpg}" alt="Settings" class="top-right"/>
+</a>
 <div class="center-content">
     <div>
         <h1>Welcome to RomaRepo!</h1>
@@ -40,8 +54,9 @@
 <!--        <button type="button">Search the Repo</button>-->
     </div>
     <div>
-        <form th:action="@{/search}" th:object="${query}" method="post">
-            <label for="query"></label><input id="query" type="text" th:field="*{query}" />
+        <form th:action="@{/search}" method="post">
+            <label for="searchQuery"></label>
+            <input id="searchQuery" type="text" name="searchQuery" placeholder="Search for a package..." />
             <button type="submit">Search</button>
         </form>
     </div>
