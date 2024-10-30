@@ -34,9 +34,7 @@ public class RunServer {
         logger.debug("Server port: {}", port);
         logger.debug("Local root: {}", localRoot);
         logger.debug("Bind to: {}", bindTo);
-
-        //StartSimpleServer();
-        logger.info("Checking the database...");
+        logger.debug("DB Location: {}", databaseLocation);
         checkDatabaseStatus(databaseLocation);
         StartServerWithCustomHandlers(port, 10, bindTo);
     }
@@ -53,7 +51,7 @@ public class RunServer {
         logger.info("============= SERVER STARTED ===========");
     }
 
-    private static void checkDatabaseStatus(String databaseLocation) throws SQLException {
+    private static void checkDatabaseStatus(String databaseLocation) {
         String databasePathString = databaseLocation + "/romarepo.db";
         Path databasePath = Path.of(databasePathString);
         if(!Files.exists(databasePath)) {

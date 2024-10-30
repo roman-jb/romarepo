@@ -4,7 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -16,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,7 +79,6 @@ public class MyUtils {
         }
     }
 
-    // !!! Does not account for cases, where <version> is not explicitly specified
     static MavenArtifact indexArtifact(String pathToPomXml) throws ParserConfigurationException, IOException, SAXException, XPathExpressionException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -93,61 +92,52 @@ public class MyUtils {
         XPathExpression artifactId = xPath.compile("//project/artifactId");
         XPathExpression version = xPath.compile("//project/version");
 
-        NodeList groupIdList = (NodeList) groupId.evaluate(document, XPathConstants.NODESET);
-        NodeList artifactIdList = (NodeList) artifactId.evaluate(document, XPathConstants.NODESET);
-        NodeList versionList = (NodeList) version.evaluate(document, XPathConstants.NODESET);
+        Node groupIdNode = (Node) groupId.evaluate(document, XPathConstants.NODE);
+        if (groupIdNode == null) {
+            groupId = xPath.compile("//project/parent/groupId");
+            groupIdNode = (Node) groupId.evaluate(document, XPathConstants.NODE);
+        }
+        Node artifactIdNode = (Node) artifactId.evaluate(document, XPathConstants.NODE);
+        Node versionNode = (Node) version.evaluate(document, XPathConstants.NODE);
+        if (versionNode == null) {
+            version = xPath.compile("//project/parent/version");
+            versionNode = (Node) version.evaluate(document, XPathConstants.NODE);
+        }
 
         return new MavenArtifact(
-                groupIdList.item(0).getTextContent(),
-                artifactIdList.item(0).getTextContent(),
-                versionList.item(0).getTextContent());
+                groupIdNode.getTextContent(),
+                artifactIdNode.getTextContent(),
+                versionNode.getTextContent());
     }
 
-    static void indexRepo() throws IOException {
+    static void indexRepo(String rootDirectory, String databaseLocation) throws IOException {
 
-        Path rootPath = Paths.get("C:\\tmp\\mavenLocal");
-
+        Path rootPath = Paths.get(rootDirectory);
         List<Path> allFiles = new ArrayList<>();
         findAllPoms(rootPath, allFiles);
-
-        System.out.println("Found files:");
-        allFiles.forEach(System.out::println);
-
-//        String startDir = "C:\\tmp\\mavenLocal";
-//        String fileToFind = "pom.xml";
-//
-//        try {
-//            Files.walkFileTree(Paths.get(startDir), new SimpleFileVisitor<>() {
-//                @Override
-//                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-//                    if (file.getFileName().toString().equals(fileToFind)) {
-//                        System.out.println("Found file: " + file);
-//                        return FileVisitResult.TERMINATE;
-//                    }
-//                    return FileVisitResult.CONTINUE;
-//                }
-//
-//                @Override
-//                public FileVisitResult visitFileFailed(Path file, IOException exc) {
-//                    log.error("e: ", exc);
-//                    return FileVisitResult.CONTINUE;
-//                }
-//            });
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        SQLiteUtils sqlliteUtils = new SQLiteUtils();
+        Connection conn = sqlliteUtils.connect(databaseLocation);
+        for (Path file : allFiles) {
+            try {
+                sqlliteUtils.insert(indexArtifact(file.toString()), conn);
+            } catch (Exception e) {
+                System.out.println("ERROR: " + e.getMessage());
+                System.out.println("-------------------------------------");
+                System.out.println("file: " + file);
+            }
+        }
     }
 
-    private static void findAllPoms(Path currentPath, List<Path> allFiles)
+    private static void findAllPoms(Path currentPath, List<Path> pomsList)
             throws IOException
     {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(currentPath))
         {
             for (Path entry : stream) {
                 if (Files.isDirectory(entry)) {
-                    findAllPoms(entry, allFiles);
+                    findAllPoms(entry, pomsList);
                 } else if (entry.toString().endsWith(".pom")) {
-                    allFiles.add(entry);
+                    pomsList.add(entry);
                 }
             }
         }

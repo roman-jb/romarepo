@@ -34,67 +34,35 @@ class ApiHandlers implements HttpHandler {
         }
     }
 
-    public void handleGet(HttpExchange exchange) throws IOException {
-        logger.debug(">> Received API GET request <<");
-        logger.debug("The following resource was requested: {}", exchange.getRequestURI());
-        String localResource = exchange.getRequestURI().getPath().replace("/api/browse", "");
-        Path LocalPath = Path.of(localRoot, localResource);
-        logger.debug("Local resource is: {}", LocalPath);
-        if (Files.exists(LocalPath) && !Files.isDirectory(LocalPath)) {
-            MyUtils.sendFile(LocalPath, exchange); //TODO: Doesn't work!
-        } else if (Files.exists(LocalPath) && Files.isDirectory(LocalPath)) {
-            String jsonResponse = ApiUtils.getDirectoryContentsJSON(LocalPath);
-            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(jsonResponse.getBytes());
-            os.close();
-        }
-    }
-
-    public void handlePut(HttpExchange exchange) throws IOException {}
-
-    private void handleError(HttpExchange exchange) throws IOException {}
-
+//    LEGACY - To be removed
 //    public void handleGet(HttpExchange exchange) throws IOException {
-//
-//        String response = "API Response Placeholder for GET method";
-//
 //        logger.debug(">> Received API GET request <<");
 //        logger.debug("The following resource was requested: {}", exchange.getRequestURI());
 //        String localResource = exchange.getRequestURI().getPath().replace("/api/browse", "");
 //        Path LocalPath = Path.of(localRoot, localResource);
 //        logger.debug("Local resource is: {}", LocalPath);
-//
 //        if (Files.exists(LocalPath) && !Files.isDirectory(LocalPath)) {
-//            response = "...This is where it supposed to send you the file...";
+//            //TODO: Add an option to view contents of a file on the Frontend, instead of downloading it?
+//            logger.info("!!! Received an API-Browse call for a file: {}   |   Such calls are not currently supported.", localResource);
 //        } else if (Files.exists(LocalPath) && Files.isDirectory(LocalPath)) {
-//            List<String> directoryContents = Files.list(LocalPath)
-//                    .map(Path::getFileName)
-//                    .map(Path::toString)
-//                    .toList();
-//            StringBuilder responseSB = new StringBuilder("Directory contents,");
-//            for (String item : directoryContents) {
-//                Path itemPath = LocalPath.resolve(item);
-//                if (Files.isDirectory(itemPath)) {
-//                    item = "[" + item + "],";
-//                    responseSB.append(item);
-//                }
-//                else { responseSB.append(item).append(","); }
-//            }
-//            response = responseSB.toString();
+//            String jsonResponse = ApiUtils.getDirectoryContentsJSON(LocalPath);
+//            exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+//            OutputStream os = exchange.getResponseBody();
+//            os.write(jsonResponse.getBytes());
+//            os.close();
 //        }
-//        exchange.sendResponseHeaders(200, response.getBytes().length);
-//        OutputStream os = exchange.getResponseBody();
-//        os.write(response.getBytes());
-//        os.close();
 //    }
 
-//    @Override
-//    public void handle(HttpExchange exchange) throws IOException {
-//        String response = "Response for API!";
-//        exchange.sendResponseHeaders(200, response.getBytes().length);
-//        OutputStream os = exchange.getResponseBody();
-//        os.write(response.getBytes());
-//        os.close();
-//    }
+    public void handleGet(HttpExchange exchange) throws IOException {
+        logger.debug(">> Received API GET request: {}", exchange.getRequestURI());
+        String jsonResponse = ApiUtils.processApiCall(exchange.getRequestURI());
+        exchange.sendResponseHeaders(200, jsonResponse.getBytes().length);
+        OutputStream os = exchange.getResponseBody();
+        os.write(jsonResponse.getBytes());
+        os.close();
+    }
+
+    public void handlePut(HttpExchange exchange) throws IOException {}
+
+    private void handleError(HttpExchange exchange) throws IOException {}
 }

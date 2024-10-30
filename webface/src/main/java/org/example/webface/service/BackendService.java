@@ -13,7 +13,7 @@ public class BackendService {
     }
 
     public String getDataFromBackend() {
-        String backendUrl = "http://127.0.0.1:1234/api/browse";
+        String backendUrl = "http://127.0.0.1:1234/api";
         return restTemplate.getForObject(backendUrl, String.class);
     }
 }

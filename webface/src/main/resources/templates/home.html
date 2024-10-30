@@ -33,6 +33,14 @@
             width: 50px;
             height: auto;
         }
+
+        #searchQuery {
+            width: 80vw; /* 80% of the viewport width */
+            max-width: 600px; /* Optional: Max width for the input */
+            box-sizing: border-box; /* Include padding and border in the element's total width */
+            padding: 10px;
+            font-size: 1em;
+        }
     </style>
 </head>
 <body>
@@ -56,7 +64,7 @@
     <div>
         <form th:action="@{/search}" method="post">
             <label for="searchQuery"></label>
-            <input id="searchQuery" type="text" name="searchQuery" placeholder="Search for a package..." />
+            <input id="searchQuery" type="text" name="searchQuery" placeholder="Search for an Artifact..." />
             <button type="submit">Search</button>
         </form>
     </div>

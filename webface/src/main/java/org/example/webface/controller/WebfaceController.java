@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.webface.FileSystemObject;
+import org.example.webface.MavenArtifact;
 import org.example.webface.service.BackendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,10 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Controller
@@ -29,7 +27,14 @@ public class WebfaceController {
     }
 
     @PostMapping("/search")
-    public String search(@RequestParam("searchQuery") String searchQuery, Model model) {
+    public String search(@RequestParam("searchQuery") String searchQuery, Model model) throws JsonProcessingException {
+        searchQuery = searchQuery.replace(" ", "%20");
+        String searchQueryToBackend = BASE_URL + "/search?query=" + searchQuery;
+        String searchResults = restTemplate.getForObject(searchQueryToBackend, String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<MavenArtifact> searchResultsList = Arrays.asList(objectMapper.readValue(searchResults, MavenArtifact[].class));
+
+        model.addAttribute("searchResultsList", searchResultsList);
         model.addAttribute("searchQuery", searchQuery);
         return "search";
     }

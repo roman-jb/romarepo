@@ -51,6 +51,11 @@
     <div>
         <h3 style="display: inline">Search results for </h3> <p style="display: inline" th:text="${searchQuery}"></p>
     </div>
+    <ul>
+        <li th:each="artifact : ${searchResultsList}">
+            <span th:text="${artifact.groupId}"></span> - <span th:text="${artifact.artifactId}"></span> - <span th:text="${artifact.version}"></span>
+        </li>
+    </ul>
 </div>
 </body>
 </html>

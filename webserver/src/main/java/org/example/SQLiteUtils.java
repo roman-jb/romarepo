@@ -44,6 +44,7 @@ public class SQLiteUtils {
         }
     }
 
+    //TODO: Optimize bulk inserts! (Separate method?)
     void insert(MavenArtifact artifact, Connection conn) {
         String sql = "INSERT INTO artifacts(groupid, artifactid, version) VALUES('"
                 + artifact.getGroupId() + "', '"
