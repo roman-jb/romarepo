@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -18,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 public class RunServer {
 //    private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void main(String[] args) throws IOException, SQLException {
+    public static void main(String[] args) throws IOException {
         System.setProperty("log4j.configurationFile", "log4j2-dev.xml"); //Doesn't work - needs fixing
         Logger logger = LogManager.getLogger();
 
@@ -36,6 +34,7 @@ public class RunServer {
         logger.debug("Bind to: {}", bindTo);
         logger.debug("DB Location: {}", databaseLocation);
         checkDatabaseStatus(databaseLocation);
+
         StartServerWithCustomHandlers(port, 10, bindTo);
     }
 
@@ -57,7 +56,7 @@ public class RunServer {
         if(!Files.exists(databasePath)) {
             SQLiteUtils sqlLiteInit = new SQLiteUtils();
             sqlLiteInit.initDatabase(sqlLiteInit.connect(databasePathString));
-        };
+        }
     }
 
     //Deprecated - to be removed
