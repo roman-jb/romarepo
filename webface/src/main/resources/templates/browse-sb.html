@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<head>
+    <title>Browse RomaRepo</title>
+    <style>
+        .top-right {
+            position: absolute;
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            z-index: 1000; /* Ensure it stays on top */
+            text-decoration: none; /* Optional: Remove underline */
+        }
+    </style>
+</head>
+<body>
+    <h1>[Browsing the Repo with Springback&trade;]</h1>
+    <a th:href="@{/}" class="top-right">[Home]</a>
+    <ul>
+        <li th:if="!${inRootDirectory}"><a th:href="@{'..'}" th:text="'[Parent Directory]'"></a></li>
+        <li th:each="directory : ${directories}">
+
+            <a th:href="@{${path} + '/' + ${directory}}" th:onclick="getContent(directory)" th:text="${directory}"></a>
+        </li>
+    </ul>
+    <div th:each="file : ${filesMap}">
+        <a th:href="${file.getValue()}" th:text="${file.getKey()}"></a>
+    </div>
+</body>
+</html>

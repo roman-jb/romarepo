@@ -53,7 +53,7 @@ public class WebfaceController {
     private RestTemplate restTemplate;
 
     String lastURL;
-    @GetMapping("/browse")
+    @GetMapping("/content")
     public String browse(@RequestParam(defaultValue = "") String directoryName, Model model) throws JsonProcessingException {
         //TODO: Refactor / optimize?
         System.out.println("Directory Name is: " + directoryName); //DEBUG - Remove

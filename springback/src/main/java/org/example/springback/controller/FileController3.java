@@ -1,27 +1,20 @@
 package org.example.springback.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.tomcat.util.http.fileupload.FileUpload;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
-
 import java.io.*;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 @RestController
-@RequestMapping("/dev2")
+@RequestMapping("/springback")
 public class FileController3 {
 
     @Value("${rootDir}")
@@ -34,8 +27,8 @@ public class FileController3 {
         );
         System.out.println(">>> NEW GET REQUEST <<<");
         System.out.println("Raw Path is: " + path );
-        path = path.replace("/dev2", ""); //TODO: Make it not capture the dev2 part
-        path = path.replace("/", "\\"); //Excessive - Java/SB parses it automatically?
+        path = path.replace("/springback", ""); //TODO: Make it not capture the dev2 part
+        //path = path.replace("/", "\\"); //Excessive - Java/SB parses it automatically?
         String windowsPath = rootDir + path;
         System.out.println("Windows Path is: " + windowsPath );
         File requestedFile = new File(windowsPath);
@@ -65,7 +58,8 @@ public class FileController3 {
         System.out.println(">>> NEW PUT REQUEST <<<");
         // Extract the file path from the request URL
         String requestURL = request.getRequestURI();
-        requestURL = requestURL.replace("/dev2", ""); //TODO: Make it not capture the dev2 part
+        System.out.println("Raw request URL is: " + requestURL);
+        requestURL = requestURL.replace("/springback", ""); //TODO: Make it not capture the dev2 part
         System.out.println("Request URL is: " + requestURL);
         String filePath = rootDir + requestURL;
         System.out.println("File Path is: " + filePath);
