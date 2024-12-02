@@ -16,7 +16,7 @@
     <h1>[Browsing the Repo with Springback&trade;]</h1>
     <a th:href="@{/}" class="top-right">[Home]</a>
     <ul>
-        <li th:if="!${inRootDirectory}"><a th:href="@{'..'}" th:text="'[Parent Directory]'"></a></li>
+        <li th:if="!${inRootDirectory}"><a th:href="@{'../'}" th:text="'[Parent Directory]'"></a></li>
         <li th:each="directory : ${directories}">
 
             <a th:href="@{${path} + '/' + ${directory}}" th:onclick="getContent(directory)" th:text="${directory}"></a>
