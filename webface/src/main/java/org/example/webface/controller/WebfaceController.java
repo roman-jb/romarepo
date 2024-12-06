@@ -30,6 +30,7 @@ public class WebfaceController {
     public String search(@RequestParam("searchQuery") String searchQuery, Model model) throws JsonProcessingException {
         searchQuery = searchQuery.replace(" ", "%20");
         String searchQueryToBackend = BASE_URL + "/search?query=" + searchQuery;
+        System.out.println("Search Query to Backend: " + searchQueryToBackend);
         String searchResults = restTemplate.getForObject(searchQueryToBackend, String.class);
         ObjectMapper objectMapper = new ObjectMapper();
         List<MavenArtifact> searchResultsList = Arrays.asList(objectMapper.readValue(searchResults, MavenArtifact[].class));
