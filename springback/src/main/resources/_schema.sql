@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS maven_artifact (id integer PRIMARY KEY, groupid text NOT NULL, artifactid text NOT NULL, version text NOT NULL)
