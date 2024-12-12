@@ -25,4 +25,13 @@ public class MavenArtifactService {
         return mavenArtifactRepository
                 .findMavenArtifactsByGroupIdContainingIgnoreCaseOrArtifactIdContainingIgnoreCase(query, query);
     }
+
+    public boolean bulkAddArtifacts(List<MavenArtifact> artifacts) {
+        try {
+            mavenArtifactRepository.saveAll(artifacts);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
