@@ -1,6 +1,9 @@
 package org.example.springback.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.springback.Utils;
+import org.example.springback.service.MavenArtifactService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -19,6 +22,9 @@ public class FileController {
 
     @Value("${rootDir}")
     private String rootDir;
+
+    @Autowired
+    MavenArtifactService mavenArtifactService;
 
     @GetMapping("/**")
     public ResponseEntity<Resource> getFile(HttpServletRequest request) {
@@ -59,7 +65,7 @@ public class FileController {
         // Extract the file path from the request URL
         String requestURL = request.getRequestURI();
         System.out.println("Raw request URL is: " + requestURL);
-        requestURL = requestURL.replace("/springback", ""); //TODO: Make it not capture the dev2 part
+        requestURL = requestURL.replace("/springback", ""); //TODO: Make it not capture the springback part
         System.out.println("Request URL is: " + requestURL);
         String filePath = rootDir + requestURL;
         System.out.println("File Path is: " + filePath);
@@ -72,6 +78,16 @@ public class FileController {
         // Save the file
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
             outputStream.write(fileBytes);
+            //Indexing the POM
+            //TODO: Make an indexing queue and index in a separate thread
+            if (filePath.endsWith(".pom")) {
+                try {
+                    mavenArtifactService.addArtifact(Utils.indexArtifact(filePath));
+                }
+                catch (Exception e) {
+                    System.out.println("Failed to index the POM: " + filePath);
+                }
+            }
             return ResponseEntity.ok("File uploaded successfully: " + filePath);
         }
         catch (IOException e) {

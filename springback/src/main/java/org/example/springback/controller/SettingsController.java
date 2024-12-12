@@ -1,7 +1,6 @@
 package org.example.springback.controller;
 
 import org.example.springback.MavenArtifact;
-import org.example.springback.MavenArtifactRepository;
 import org.example.springback.Utils;
 import org.example.springback.service.MavenArtifactService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @RestController

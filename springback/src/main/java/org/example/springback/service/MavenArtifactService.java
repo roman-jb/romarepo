@@ -13,12 +13,13 @@ public class MavenArtifactService {
     @Autowired
     private MavenArtifactRepository mavenArtifactRepository;
 
-    public MavenArtifact addArtifact(String groupId, String artifactId, String version) {
-        MavenArtifact artifact = new MavenArtifact();
-        artifact.setGroupId(groupId);
-        artifact.setArtifactId(artifactId);
-        artifact.setVersion(version);
-        return mavenArtifactRepository.save(artifact);
+    public boolean addArtifact(MavenArtifact artifact) {
+        try {
+            mavenArtifactRepository.save(artifact);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
     }
 
     public List<MavenArtifact> findArtifacts(String query) {
